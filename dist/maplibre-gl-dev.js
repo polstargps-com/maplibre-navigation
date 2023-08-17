@@ -52307,6 +52307,8 @@ let Map$1 = class Map extends Camera {
             this._enableRepaint = isEnable;
         };
         this._enableRepaint = true;
+        this._showRenderPerSec = options.showRenderPerSec;
+        this._renderCount = 0;
         this._interactive = options.interactive;
         this._cooperativeGestures = options.cooperativeGestures;
         this._metaKey = navigator.platform.indexOf('Mac') === 0 ? 'metaKey' : 'ctrlKey';
@@ -52332,6 +52334,12 @@ let Map$1 = class Map extends Camera {
         this.transformCameraUpdate = options.transformCameraUpdate;
         this._imageQueueHandle = ImageRequest.addThrottleControl(() => this.isMoving());
         this._requestManager = new RequestManager(options.transformRequest);
+        if (this._showRenderPerSec) {
+            window.setInterval(() => {
+                console.log(this._renderCount);
+                this._renderCount = 0;
+            }, 1000);
+        }
         if (typeof options.container === 'string') {
             this._container = document.getElementById(options.container);
             if (!this._container) {
@@ -54487,6 +54495,9 @@ let Map$1 = class Map extends Camera {
         this._placementDirty = this.style && this.style._updatePlacement(this.painter.transform, this.showCollisionBoxes, fadeDuration, this._crossSourceCollisions);
         // Actually draw
         if (this._enableRepaint) {
+            if (this._showRenderPerSec) {
+                this._renderCount += 1;
+            }
             this.painter.render(this.style, {
                 showTileBoundaries: this.showTileBoundaries,
                 showOverdrawInspector: this._showOverdrawInspector,
